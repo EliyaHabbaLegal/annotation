@@ -4,7 +4,9 @@ import re
 import docx
 import numpy as np
 # from PIL import Image
-from annotation import output_xml, read_xml
+import pandas as pd
+
+# from annotation import output_xml, read_xml
 
 """
 .. module:: streamlit_img_labelכ
@@ -128,9 +130,9 @@ class TxtManager:
     #     """
     #     self._current_rects[index]["label"] = label
 
-    def save_annotation(self):
-        """output the xml annotation file."""
-        output_xml(self._filename, self._img, self._current_rects)
+    # def save_annotation(self):
+    #     """output the xml annotation file."""
+    #     output_xml(self._filename, self._img, self._current_rects)
 
 
 class TxtDirManager:
@@ -139,7 +141,10 @@ class TxtDirManager:
         self._files = []
         self._annotations_files = []
 
-    def get_all_files(self, allow_types=["docx"]):
+    def get_df(self, allow_types=["docx"]):
+        df = pd.read_csv(r'all_results_with_origin_sen_clean.csv')
+        return df
+
         allow_types += [i.upper() for i in allow_types]
         mask = ".*\.[" + "|".join(allow_types) + "]"
         self._files = [
