@@ -7,6 +7,8 @@
 # for index, row in df.iterrows():
 #     sentence = row['origin_sentence']
 
+# streamlit_app.py
+
 import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import storage
@@ -17,6 +19,7 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = storage.Client(credentials=credentials)
 
+
 # Retrieve file contents.
 # Uses st.experimental_memo to only rerun when the query changes or after 10 min.
 @st.experimental_memo(ttl=600)
@@ -25,8 +28,9 @@ def read_file(bucket_name, file_path):
     content = bucket.blob(file_path).download_as_string().decode("utf-8")
     return content
 
+
 bucket_name = "streamlit-bucket"
-file_path = "all_results_with_origin_sen_clean.csv"
+file_path = "myfile.csv"
 
 content = read_file(bucket_name, file_path)
 
