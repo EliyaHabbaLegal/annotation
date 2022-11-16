@@ -43,9 +43,10 @@ def run(txt_dir, labels):
     taggers = [f for f in os.listdir('taggers') if os.path.isfile(os.path.join('taggers', f))]
     # remove the suffix of the files from the list
     taggers = [t.split(".")[0] for t in taggers]
-    # get the name of the current tagger
+    # get the name of the current tagger. Ask the uset to choose his name from the list
+    chosen_tagger = st.sidebar.selectbox("Choose your name", taggers)
     chosen_tagger = st.sidebar.selectbox(
-        "Tagger",
+        "Choose your name",
         taggers,
         key="tagger",
     )
