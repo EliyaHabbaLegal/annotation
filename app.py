@@ -3,10 +3,51 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import os
+
+from font_utils import markdown_bold_text_to_html, markdown_not_bold_text_to_html, \
+    markdown_not_bold_and_bold_text_to_html
 from manage_txt import TxtDirManager
+
+def create_hebrew_style():
+    st.markdown("""
+<style>
+input {
+  unicode-bidi:bidi-override;
+  direction: RTL;
+}
+</style>
+    """, unsafe_allow_html=True)
+
+def create_en_style():
+    st.markdown("""
+<style>
+input {
+  unicode-bidi:bidi-override;
+  direction: LTR;
+}
+</style>
+    """, unsafe_allow_html=True)
+
 
 
 def init_session_state(idm):
+    from PIL import Image
+    image = Image.open("logo_image.jpg")
+    new_image = image.resize((400, 300))
+    title = 'היא היתה נחושה ומשכנעת בתשובותיה והנני נותן אמון מלא בעדותה'
+    # add a Apostrophes to the title in the beginning and in the end
+    title = '"' + title + '"'
+    # write the title in the middle of the page with italic style, and the size of the font is 20
+    st.markdown(f'<p style="text-align: center; font-size:20px; font-style:italic;">{title}</p>',
+                unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    col2.image(new_image)
+    col1.markdown('''<h2 style="text-align: center; font-size:30px; color:Blue;">Welcome to the data annotation tool! 😊</h2>''',
+                  unsafe_allow_html=True)
+    col1.markdown('''<h3 style="text-align: center; font-size:20px; color:Blue;">Please choose your name from the taggers list in the left side.</h3>''',
+                  unsafe_allow_html=True)
+
     chosen_tagger = st.session_state["chosen_tagger"]
     if "files_number" not in st.session_state:
 
@@ -136,6 +177,7 @@ def run(txt_dir, labels):
             st.session_state["label"] = label
         else:
             st.session_state["label"] = None
+        st.session_state['title'] = row['title']
         st.session_state['sentence_id'] = row['sentence_id']
         # read the file
         file_path = os.path.join(r'sentencing_decisions', file_name)
@@ -160,17 +202,20 @@ def run(txt_dir, labels):
 
 
     def display_text():
-        st.text('text')
+        title = 'הטקסט לקוח מתוך הקובץ'
+        title = f'{title} : {st.session_state["title"]}'
+        st.markdown(f'<p style="text-align: right; direction: rtl; unicode-bidi: bidi-override;">{title}</p>', unsafe_allow_html=True)
+
         for i in range(st.session_state["start_sentence_index"], st.session_state["end_sentence_index"]):
             sentence = st.session_state["sentences"][i]
 
             if i == st.session_state["sentence_index"]:
                 st.markdown(
-                    f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: RTL;}} direction: RTL; color: grey; 'font-weight:bold;><span style=font-weight:bold;> {sentence} </span></p>",
+                    f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: RTL;}} direction: RTL;  font-style:italic; color: grey; ' font-style:italic; font-weight:bold;><span style=font-weight:bold;> {sentence} </span></p>",
                     unsafe_allow_html=True)
             else:
                     st.markdown(
-                        f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: RTL;}} direction: RTL; color: grey; '>{sentence}</p>",
+                        f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: RTL;}} direction: RTL;  font-style:italic; color: grey; '>{sentence}</p>",
                         unsafe_allow_html=True)
 
     st.sidebar.selectbox(
@@ -238,6 +283,15 @@ def run(txt_dir, labels):
             st.button(label="Add the next sentence", on_click=next_sentence)
             st.button(label="Remove the last sentence", on_click=remove_last_sentence)
 
+        # display to screen instructions for the user to annotate the text
+        instructions = 'בחר את התווית המתאימה לטקסט המצורף. כאשר תסיים לתייג את הטקסט, לחץ על הכפתור "שמור תיוג".'
+        english_instructions = 'Select the appropriate label for the text. When you finish tagging the text, click the "Save tagging" button.'
+        # display the instructions to the user in Hebrew and English languages one after the other
+        create_hebrew_style()
+
+        st.markdown(f'<p style="text-align: right; color:Orange; direction: rtl; unicode-bidi: bidi-override;">{instructions}</p>', unsafe_allow_html=True)
+        st.markdown(f'<p style="text-align: right; color:Orange ;direction: ltr; unicode-bidi: bidi-override;">{english_instructions}</p>', unsafe_allow_html=True)
+        #
 
         col1, col2 = st.columns(2)
         with col1:
@@ -248,18 +302,15 @@ def run(txt_dir, labels):
                 # there is a saved label for this sentence
                 st.session_state["selected_label"] = st.session_state["label"]
                 # print a message that the sentence is already annotated
-                # st.markdown(
-                #     f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: RTL;}}"
-                #     f" direction: RTL; color: grey; 'font-weight:bold;><span style=font-weight:bold;> This sentence is already annotated </span></p>",
-                #     unsafe_allow_html=True)
+
                 title1 = f"This sentence is already annotated. The saved label:"
                 title2 = f"{st.session_state['selected_label']}"
                 title3 = f"If you want to change the label, select a new label and click on the 'Save' button."
-                new_title1 = f'<p style="font-family:sans-serif; color:Green; font-size: 22px;">{title1}</p>'
+                new_title1 = f'<p style="font-family:sans-serif; color:Green; font-size: 16px;">{title1}</p>'
                 new_title2 = f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: RTL;}} direction: RTL; color: grey; 'font-weight:bold;><span style=font-weight:bold;> {title2} </span></p>"
-                new_title2 = f'<p style="font-family:sans-serif; color:black; ' \
-                             f'font-weight:bold;><span style=font-weight:bold;>font-size: 22px;">{title2}</p>'
-                new_title3 = f'<p style="font-family:sans-serif; color:Green; font-size: 22px;">{title3}</p>'
+                new_title2 = f'<p style="text-align:center;  color:Red; font-family:sans-serif;  ' \
+                             f'font-weight:bold;><span style=font-weight:bold;>font-size: 16px;">{title2}</p>'
+                new_title3 = f'<p style="font-family:sans-serif; color:Green; font-size: 16px;">{title3}</p>'
                 # st.markdown(
                 #     f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: RTL;}}"
                 #     f" direction: RTL; color: grey; 'font-weight:bold;><span style=font-weight:bold;> This sentence is already annotated </span></p>",
@@ -281,27 +332,71 @@ def run(txt_dir, labels):
                 st.markdown(new_title3, unsafe_allow_html=True)
             default_index = 0
 
-            selected_label = col2.selectbox(
-                "Label", labels, key=f"selectedLabel",
+        with st.container():
+            col1, col2 = st.columns(2)
+            msg = "choose the best category for the sentence."
+            # print the msg to the user
+            with col1:
+                st.markdown(
+                    f"<p style='text-align:LTR; input {{unicode-bidi:bidi-override; direction: RTL;}}"
+                    f" direction: LTR; color: grey; 'font-weight:bold;><span style=font-weight:bold;> {msg} </span></p>",
+                    unsafe_allow_html=True)
+
+            with col1:
+                selected_label = col1.selectbox(
+                "Main category", labels, key=f"selectedLabel",
                 index=default_index
             )
-            st.session_state["selected_label"] = selected_label
+                st.session_state["selected_label"] = selected_label
+
+                with st.expander("Secondary category (Only if the main category is not clear enough)"):
+                    selected_label2 = st.selectbox(
+                        "Secondary category", labels+[None], key=f"selectedLabel2",
+                        index=len(labels)
+                    )
+                    st.session_state["selected_label2"] = selected_label2
+
+
             # print to the screen the selected label
-            st.markdown(
-                f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: RTL;}}"
-                f" direction: RTL; color: grey; 'font-weight:bold;><span style=font-weight:bold;> {selected_label} </span></p>",
-                unsafe_allow_html=True)
+            create_en_style()
+            output1 = f"The selected labels are:"
+            output2 = f"Main category:"
+            output3= f" {selected_label}"
+            output4 = f"Secondary category:"
+            output5 = f" {selected_label2}"
+            with col1:
+                markdown_not_bold_text_to_html(output1)
+                markdown_not_bold_and_bold_text_to_html(output2, output3)
+                if selected_label2:
+                    markdown_not_bold_and_bold_text_to_html(output4, output5)
+                # allow the user to write a comment
+                # resize the comment box
+            with col2:
+                output_text = "Comment - you can write a comment here. For example, if you think that this is not a good sentence, you can write it here."
+                create_hebrew_style()
+                st.text_area(output_text, height=200, max_chars=1000)
+            with col1:
+                st.button(label="Save", on_click=annotate)
+
+
+            # st.markdown(
+            #     f"<p style='color:Blue; text-align: input {{unicode-bidi:bidi-override; direction: LTR;}} "
+            #     f" direction: LTR; color: Blue; 'font-weight:bold;><span style=font-color:Blue;> {output1} </span></p>",
+            #     unsafe_allow_html=True)
+            # st.markdown(
+            #     f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: LTR;}}"
+            #     f" direction: LTR; color: grey; 'font-weight:bold;><span style=font-weight:bold;> {output2} </span></p>",
+            #     unsafe_allow_html=True)
+            # st.markdown(
+            #     f"<p style='text-align: input {{unicode-bidi:bidi-override; direction: LTR;}}"
+            #     f" direction: LTR; color: grey; 'font-weight:bold;><span style=font-weight:bold;> {output3} </span></p>",
+            #     unsafe_allow_html=True)
 
         # st.button(label="Save", on_click=annotate)
         # put save button in the middle of the page
-        col1, col2, col3 = st.columns(3)
-        with col2:
-
-            st.button(label="Save", on_click=annotate)
-
+        # col1, col2, col3 = st.columns(3)
 
 if __name__ == "__main__":
     #list of labels
     labels = ["category{}".format(i) for i in range(1, 11)]
-
     run("txt_dir", labels)
