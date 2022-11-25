@@ -43,7 +43,7 @@ def init_session_state(idm):
 
     col1, col2 = st.columns(2)
     col2.image(new_image)
-    col1.markdown('''<h2 style="text-align: center; font-size:30px; color:Blue;">Welcome to the data annotation tool! 😊</h2>''',
+    col1.markdown('''<h2 style="text-align: center; font-size:30px; color:Blue;">Welcome to the data annotation tool!/h2>''',
                   unsafe_allow_html=True)
     col1.markdown('''<h3 style="text-align: center; font-size:20px; color:Blue;">Please choose your name from the taggers list in the left side.</h3>''',
                   unsafe_allow_html=True)
@@ -58,8 +58,8 @@ def init_session_state(idm):
         st.session_state["files_number"] = tagger_df.shape[0]
         st.session_state["annotation_files"] = tagger_df[tagger_df["status"] == "annotated"]["title"].tolist()
         st.session_state["file_index"] = 0
-        st.session_state["start_sentence_index"]=-1
-        st.session_state["end_sentence_index"]=-1
+        st.session_state["start_sentence_index"] = -1
+        st.session_state["end_sentence_index"] = -1
     else:
         tagger_df = pd.read_csv(os.path.join("taggers", f"{chosen_tagger}.csv"))
         st.session_state["df"] = tagger_df
